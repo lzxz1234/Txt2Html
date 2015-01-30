@@ -69,24 +69,7 @@ class MainWindow(QMainWindow):
             os.makedirs(target_html_dir)
 
         Log.info(u'输出目录定位到：%s'%target_html_dir)
-        all_novels = []
-        for novel in self.treeView.model().novels():
-            Log.info(u'处理文件[%s]'%novel.file)
-            novel_cur_dir = os.path.join(target_html_dir, novel.safe_title)
-            os.mkdir(novel_cur_dir)
-            write(novel_cur_dir, 'index.html', HtmlGenerator.genNovelIndex(novel))
-            portrait = DB.query_novel_portrait(novel.title)
-            if portrait:
-                shutil.copy(portrait, os.path.join(novel_cur_dir, 'post.jpg'))
-            else:
-                Log.warn(u'小说[%s]未找到封面图片'%novel.title)
-            for volume in novel.volumes:
-                if volume.content:
-                    write(novel_cur_dir, volume.safe_name+'.html', HtmlGenerator.genChapter(volume, volume))
-                for chapter in volume.sub_chapters:
-                    write(novel_cur_dir, volume.safe_name+'-'+chapter.safe_name+'.html', HtmlGenerator.genChapter(volume, chapter))
-            all_novels.append(novel)
-        write(target_html_dir, 'index.html', HtmlGenerator.genIndex(all_novels))
+        HtmlGenerator.genAll(self.treeView.model().novels(), target_html_dir)
         Log.info(u'--------------------------任-务-完-成--------------------------')
 
     def refresh_file_list(self, dir_path):
