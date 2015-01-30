@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>{{ novel.title }}</title>
+</head>
+<body>
+
+    <h1>标题：{{ novel.title }}</h1>
+    <p>简介：{{ novel.desc }}</p>
+    <p><img src="./post.jpg"></p>
+    章节列表：
+    {% for volume in novel.volumes %}
+        {% if volume.content != null %}
+        <h2><a href="./{{ volume.safe_name }}.html">{{ volume.name }}</a></h2>
+        {% endif %}
+        {% for chapter in volume.sub_chapters %}
+            <h3><a href="./{{ volume.safe_name }}-{{ chapter.safe_name }}.html">{{ chapter.name }}</a></h3>
+        {% endfor %}
+    {% endfor %}
+</body>
+</html>

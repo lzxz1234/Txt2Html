@@ -8,15 +8,25 @@ from codecs import open
 from util.Log import Log
 
 
-class NovelInfo():
+class Seq():
+
+    seq = 1
 
     def __init__(self):
+        self.seq = str(Seq.seq)
+        Seq.seq += 1
+
+class NovelInfo(Seq):
+
+    def __init__(self):
+        Seq.__init__(self)
         self._volumes = []
         self._title = None
+        self._desc = None
 
     @staticmethod
     def fromFile(novel_path):
-        p = re.compile(r'(§+)\s*([^\r\n]+)([^§]+)')
+        p = re.compile(u'(§+)\s*([^\r\n]+)([^§]+)')
         if novel_path.endswith("txt"):
             for encode in ['utf8', 'gb2312', 'gb18030']:
                 fileInput = open(novel_path, encoding=encode)
@@ -30,8 +40,13 @@ class NovelInfo():
                         chapter.name = name
                         chapter.content = content
                         if flag == u"§§":
-                            result._volumes.append(chapter)
+                            last_volume = chapter
+                            result.add_volume(chapter)
                         else:
+                            if not last_volume:
+                                last_volume = Chapter()
+                                chapter.name = result.title
+                                result.add_volume(last_volume)
                             last_volume.addChapter(chapter)
                     return result
                 except UnicodeDecodeError as e:
@@ -46,21 +61,33 @@ class NovelInfo():
     def volumes(self):
         return self._volumes
 
-    @volumes.setter
-    def volumes(self, volumes):
-        self._volumes = volumes
+    @property
+    def desc(self):
+        return self._desc
+
+    @desc.setter
+    def desc(self, desc):
+        self._desc = desc
+
+    def add_volume(self, volume):
+        self._volumes.append(volume)
 
     @property
     def title(self):
         return self._title
 
+    @property
+    def safe_title(self):
+        return self.seq
+
     @title.setter
     def title(self, title):
         self._title = title
 
-class Chapter():
+class Chapter(Seq):
 
     def __init__(self):
+        Seq.__init__(self)
         self._name = None
         self._content = None
         self._sub_chapters = []
@@ -75,6 +102,10 @@ class Chapter():
     @property
     def name(self):
         return self._name
+
+    @property
+    def safe_name(self):
+        return self.seq
 
     @name.setter
     def name(self, name):

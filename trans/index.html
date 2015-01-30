@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Index</title>
+</head>
+<body>
+    <div>
+        {% for item in list %}
+        <a href="./{{ item.safe_title }}/index.html">{{ item.title }}</a><br>
+        {% endfor %}
+    </div>
+</body>
+</html>

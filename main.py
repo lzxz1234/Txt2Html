@@ -2,6 +2,7 @@
 
 import os
 import sys
+import shutil
 
 from PyQt4 import uic
 from PyQt4.Qt import SIGNAL
@@ -9,12 +10,13 @@ from PyQt4.QtGui import QApplication
 from PyQt4.QtGui import QMainWindow
 from PyQt4.QtGui import QFileDialog
 
-from util.FileScanner import scan
+from util.File import scan, write
 from ui.Model import ProcessModel
 from ui.PortraitDisplayScene import PortraitDisplayScene
 from db.SQLites import DB
 from util.Log import Log
 from trans.ValueObject import NovelInfo
+from trans import HtmlGenerator
 
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -61,17 +63,37 @@ class MainWindow(QMainWindow):
 
     def start_convert(self):
         Log.info(u'-------------------------开始生成 HTML-------------------------')
-        novel_file_dir = unicode(self.novelFilePath.text())
-        target_html_dir = os.path.join(novel_file_dir, 'html')
+        novel_root_dir = unicode(self.novelFilePath.text())
+        target_html_dir = os.path.join(novel_root_dir, 'html')
         if not os.path.exists(target_html_dir):
             os.makedirs(target_html_dir)
+
         Log.info(u'输出目录定位到：%s'%target_html_dir)
+        all_novels = []
         for novel_path in self.treeView.model().files():
+            file_name = os.path.split(novel_path)[1]
             novel_info = NovelInfo.fromFile(novel_path)
+            novel_info.desc = DB.query_novel_info(os.path.basename(novel_path))
             if novel_info:
-                Log.info(u'处理文件[%s]中'%novel_path)
+                Log.info(u'处理文件[%s]'%novel_path)
+                novel_cur_dir = os.path.join(target_html_dir, novel_info.safe_title)
+                os.mkdir(novel_cur_dir)
+                write(novel_cur_dir, 'index.html', HtmlGenerator.genNovelIndex(novel_info))
+                portrait = DB.query_novel_portrait(file_name)
+                if portrait:
+                    shutil.copy(portrait, os.path.join(novel_cur_dir, 'post.jpg'))
+                else:
+                    Log.warn(u'小说[%s]未找到封面图片'%novel_info.title)
+                for volume in novel_info.volumes:
+                    if volume.content:
+                        write(novel_cur_dir, volume.safe_name+'.html', HtmlGenerator.genChapter(volume, volume))
+                    for chapter in volume.sub_chapters:
+                        write(novel_cur_dir, volume.safe_name+'-'+chapter.safe_name+'.html', HtmlGenerator.genChapter(volume, chapter))
             else:
                 Log.warn(u'文件[%s]格式解析错误'%novel_path)
+            all_novels.append(novel_info)
+        write(target_html_dir, 'index.html', HtmlGenerator.genIndex(all_novels))
+        Log.info(u'--------------------------任-务-完-成--------------------------')
 
     def refresh_file_list(self, dir_path):
         novel_file_list = scan(unicode(dir_path))
