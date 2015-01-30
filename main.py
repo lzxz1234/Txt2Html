@@ -70,28 +70,22 @@ class MainWindow(QMainWindow):
 
         Log.info(u'输出目录定位到：%s'%target_html_dir)
         all_novels = []
-        for novel_path in self.treeView.model().files():
-            file_name = os.path.split(novel_path)[1]
-            novel_info = NovelInfo.fromFile(novel_path)
-            novel_info.desc = DB.query_novel_info(os.path.basename(novel_path))
-            if novel_info:
-                Log.info(u'处理文件[%s]'%novel_path)
-                novel_cur_dir = os.path.join(target_html_dir, novel_info.safe_title)
-                os.mkdir(novel_cur_dir)
-                write(novel_cur_dir, 'index.html', HtmlGenerator.genNovelIndex(novel_info))
-                portrait = DB.query_novel_portrait(file_name)
-                if portrait:
-                    shutil.copy(portrait, os.path.join(novel_cur_dir, 'post.jpg'))
-                else:
-                    Log.warn(u'小说[%s]未找到封面图片'%novel_info.title)
-                for volume in novel_info.volumes:
-                    if volume.content:
-                        write(novel_cur_dir, volume.safe_name+'.html', HtmlGenerator.genChapter(volume, volume))
-                    for chapter in volume.sub_chapters:
-                        write(novel_cur_dir, volume.safe_name+'-'+chapter.safe_name+'.html', HtmlGenerator.genChapter(volume, chapter))
+        for novel in self.treeView.model().novels():
+            Log.info(u'处理文件[%s]'%novel.file)
+            novel_cur_dir = os.path.join(target_html_dir, novel.safe_title)
+            os.mkdir(novel_cur_dir)
+            write(novel_cur_dir, 'index.html', HtmlGenerator.genNovelIndex(novel))
+            portrait = DB.query_novel_portrait(novel.title)
+            if portrait:
+                shutil.copy(portrait, os.path.join(novel_cur_dir, 'post.jpg'))
             else:
-                Log.warn(u'文件[%s]格式解析错误'%novel_path)
-            all_novels.append(novel_info)
+                Log.warn(u'小说[%s]未找到封面图片'%novel.title)
+            for volume in novel.volumes:
+                if volume.content:
+                    write(novel_cur_dir, volume.safe_name+'.html', HtmlGenerator.genChapter(volume, volume))
+                for chapter in volume.sub_chapters:
+                    write(novel_cur_dir, volume.safe_name+'-'+chapter.safe_name+'.html', HtmlGenerator.genChapter(volume, chapter))
+            all_novels.append(novel)
         write(target_html_dir, 'index.html', HtmlGenerator.genIndex(all_novels))
         Log.info(u'--------------------------任-务-完-成--------------------------')
 
@@ -105,28 +99,24 @@ class MainWindow(QMainWindow):
 
     def save_and_load_novel_info(self, current, previous):
         # save previous first
-        previous_novel = self.treeView.model().get_file(previous)
-        if os.path.exists(previous_novel):
-            previous_file_name = os.path.basename(previous_novel)
-            previous_file_desc = self.descBrowser.toPlainText()
-            previous_file_icon = self.portraitView.scene().file_path
-            if previous_file_name and (previous_file_desc or previous_file_icon):
-                if str(previous_file_desc):
-                    DB.save_novel_info(previous_file_name, str(previous_file_desc))
-                if os.path.exists(previous_file_icon):
-                    DB.save_novel_portrait(previous_file_name, previous_file_icon)
+        previous_novel = self.treeView.model().get_novel(previous)
+        previous_file_desc = self.descBrowser.toPlainText()
+        previous_file_icon = self.portraitView.scene().file_path
+        if previous_file_desc or previous_file_icon:
+            if str(previous_file_desc):
+                DB.save_novel_info(previous_novel.title, str(previous_file_desc))
+            if os.path.exists(previous_file_icon):
+                DB.save_novel_portrait(previous_novel.title, previous_file_icon)
         # load current
-        selected_novel = self.treeView.model().get_file(current)
-        if os.path.exists(selected_novel):
-            selected_file_name = os.path.basename(selected_novel)
-            self.descBrowser.setPlainText(DB.query_novel_info(selected_file_name))
-            portrait_file = DB.query_novel_portrait(selected_file_name)
+        selected_novel = self.treeView.model().get_novel(current)
+        self.descBrowser.setPlainText(DB.query_novel_info(selected_novel.title))
+        portrait_file = DB.query_novel_portrait(selected_novel.title)
+        if not os.path.exists(portrait_file):
+            novel_name, novel_suffix = os.path.splitext(selected_novel.title)
+            portrait_file = os.path.join(str(self.imageFilePath.text()), novel_name+'.jpg')
             if not os.path.exists(portrait_file):
-                novel_name, novel_suffix = os.path.splitext(selected_file_name)
-                portrait_file = os.path.join(str(self.imageFilePath.text()), novel_name+'.jpg')
-                if not os.path.exists(portrait_file):
-                    portrait_file = os.path.join(str(self.imageFilePath.text()), novel_name+'.png')
-            self.portraitView.scene().set_file(portrait_file)
+                portrait_file = os.path.join(str(self.imageFilePath.text()), novel_name+'.png')
+        self.portraitView.scene().set_file(portrait_file)
 
     @staticmethod
     def update_input_text(input_):

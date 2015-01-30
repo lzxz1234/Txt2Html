@@ -6,6 +6,7 @@ import re
 from codecs import open
 
 from util.Log import Log
+from db.SQLites import DB
 
 
 class Seq():
@@ -22,7 +23,7 @@ class NovelInfo(Seq):
         Seq.__init__(self)
         self._volumes = []
         self._title = None
-        self._desc = None
+        self._file = None
 
     @staticmethod
     def fromFile(novel_path):
@@ -33,7 +34,8 @@ class NovelInfo(Seq):
                 try :
                     allText = fileInput.read()
                     result = NovelInfo()
-                    result.title = os.path.basename(novel_path).split('.')[0]
+                    result._file = os.path.split(novel_path)[1]
+                    result._title = os.path.basename(novel_path).split('.')[0]
                     last_volume = None
                     for flag, name, content in p.findall(allText):
                         chapter = Chapter()
@@ -63,14 +65,18 @@ class NovelInfo(Seq):
 
     @property
     def desc(self):
-        return self._desc
-
-    @desc.setter
-    def desc(self, desc):
-        self._desc = desc
+        return DB.query_novel_info(self.file_name)
 
     def add_volume(self, volume):
         self._volumes.append(volume)
+
+    @property
+    def file(self):
+        return self._file
+
+    @property
+    def file_name(self):
+        return os.path.split(self._file)[1]
 
     @property
     def title(self):
@@ -79,10 +85,6 @@ class NovelInfo(Seq):
     @property
     def safe_title(self):
         return self.seq
-
-    @title.setter
-    def title(self, title):
-        self._title = title
 
 class Chapter(Seq):
 
