@@ -15,7 +15,6 @@ from ui.Model import ProcessModel
 from ui.PortraitDisplayScene import PortraitDisplayScene
 from db.SQLites import DB
 from util.Log import Log
-from trans.ValueObject import NovelInfo
 from trans import HtmlGenerator
 
 reload(sys)

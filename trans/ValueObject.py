@@ -28,36 +28,33 @@ class NovelInfo(Seq):
     @staticmethod
     def fromFile(novel_path):
         p = re.compile(u'(§+)\s*([^\r\n]+)([^§]+)')
-        if novel_path.endswith("txt"):
-            for encode in ['utf8', 'gb2312', 'gb18030']:
-                fileInput = open(novel_path, encoding=encode)
-                try :
-                    allText = fileInput.read()
-                    result = NovelInfo()
-                    result._file = os.path.split(novel_path)[1]
-                    result._title = os.path.basename(novel_path).split('.')[0]
-                    last_volume = None
-                    for flag, name, content in p.findall(allText):
-                        chapter = Chapter()
-                        chapter.name = name
-                        chapter.content = content
-                        if flag == u"§§":
-                            last_volume = chapter
-                            result.add_volume(chapter)
-                        else:
-                            if not last_volume:
-                                last_volume = Chapter()
-                                chapter.name = result.title
-                                result.add_volume(last_volume)
-                            last_volume.addChapter(chapter)
-                    return result
-                except UnicodeDecodeError as e:
-                    continue
-                finally :
-                    fileInput.close()
-        else:
-            Log.warn(u'文件[%s]格式错误，预期格式为[txt]'%novel_path)
-        return None
+        result = NovelInfo()
+        for encode in ['utf8', 'gb2312', 'gb18030']:
+            fileInput = open(novel_path, encoding=encode)
+            try :
+                allText = fileInput.read()
+                result._file = os.path.split(novel_path)[1]
+                result._title = os.path.basename(novel_path).split('.')[0]
+                last_volume = None
+                for flag, name, content in p.findall(allText):
+                    chapter = Chapter()
+                    chapter.name = name
+                    chapter.content = content
+                    if flag == u"§§":
+                        last_volume = chapter
+                        result.add_volume(chapter)
+                    else:
+                        if not last_volume:
+                            last_volume = Chapter()
+                            chapter.name = result.title
+                            result.add_volume(last_volume)
+                        last_volume.addChapter(chapter)
+                break
+            except UnicodeDecodeError as e:
+                continue
+            finally :
+                fileInput.close()
+        return result
 
     @property
     def volumes(self):

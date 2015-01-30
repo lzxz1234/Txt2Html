@@ -8,7 +8,6 @@ from db.SQLites import DB
 from util.Log import Log
 from util.File import write
 
-
 env = Environment(loader=FileSystemLoader(os.path.dirname(__file__)))
 
 def genAll(novels, target_html_dir):
@@ -27,7 +26,7 @@ def genAll(novels, target_html_dir):
                 write(novel_cur_dir, volume.safe_name+'.html', genChapter(volume, volume))
             for chapter in volume.sub_chapters:
                 write(novel_cur_dir, volume.safe_name+'-'+chapter.safe_name+'.html', genChapter(volume, chapter))
-        write(target_html_dir, 'index.html', genIndex(novels))
+    write(target_html_dir, 'index.html', genIndex(novels))
 
 def genIndex(novels):
     return env.get_template('index.html').render(list=novels)
