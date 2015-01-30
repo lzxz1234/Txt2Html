@@ -14,6 +14,7 @@ from ui.Model import ProcessModel
 from ui.PortraitDisplayScene import PortraitDisplayScene
 from db.SQLites import DB
 from util.Log import Log
+from trans.ValueObject import NovelInfo
 
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -53,14 +54,24 @@ class MainWindow(QMainWindow):
                                   SIGNAL("clicked()"),
                                   self.start_convert)
 
-
         self.novelFilePath.setText(DB.get_param('LAST_NOVEL_PATH'))
         self.imageFilePath.setText(DB.get_param('LAST_IMAGE_PATH'))
 
         Log.info(u'系统初始化完成...')
 
     def start_convert(self):
-        target_html_dir = str(self.novelFilePath)
+        Log.info(u'-------------------------开始生成 HTML-------------------------')
+        novel_file_dir = unicode(self.novelFilePath.text())
+        target_html_dir = os.path.join(novel_file_dir, 'html')
+        if not os.path.exists(target_html_dir):
+            os.makedirs(target_html_dir)
+        Log.info(u'输出目录定位到：%s'%target_html_dir)
+        for novel_path in self.treeView.model().files():
+            novel_info = NovelInfo.fromFile(novel_path)
+            if novel_info:
+                Log.info(u'处理文件[%s]中'%novel_path)
+            else:
+                Log.warn(u'文件[%s]格式解析错误'%novel_path)
 
     def refresh_file_list(self, dir_path):
         novel_file_list = scan(unicode(dir_path))

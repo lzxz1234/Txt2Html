@@ -23,6 +23,9 @@ class ProcessModel(QAbstractTableModel):
     def get_file(self, index):
         return self._file_list[index.row()]
 
+    def files(self):
+        return self._file_list
+
     def data(self, index, role=None):
         row, col = index.row(), index.column()
 
