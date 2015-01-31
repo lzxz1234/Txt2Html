@@ -84,21 +84,17 @@ class MainWindow(QMainWindow):
         previous_novel = self.treeView.model().get_novel(previous)
         previous_file_desc = self.descBrowser.toPlainText()
         previous_file_icon = self.portraitView.scene().file_path
-        if previous_file_desc or previous_file_icon:
-            if str(previous_file_desc):
-                DB.save_novel_info(previous_novel.title, str(previous_file_desc))
-            if os.path.exists(previous_file_icon):
-                DB.save_novel_portrait(previous_novel.title, previous_file_icon)
+        DB.save_novel_info(previous_novel.title, str(previous_file_desc), previous_file_icon)
         # load current
         selected_novel = self.treeView.model().get_novel(current)
-        self.descBrowser.setPlainText(DB.query_novel_info(selected_novel.title))
-        portrait_file = DB.query_novel_portrait(selected_novel.title)
-        if not os.path.exists(portrait_file):
+        desc, portrait = DB.query_novel_info(selected_novel.title)
+        self.descBrowser.setPlainText(desc)
+        if not os.path.exists(portrait):
             novel_name, novel_suffix = os.path.splitext(selected_novel.title)
-            portrait_file = os.path.join(str(self.imageFilePath.text()), novel_name+'.jpg')
-            if not os.path.exists(portrait_file):
-                portrait_file = os.path.join(str(self.imageFilePath.text()), novel_name+'.png')
-        self.portraitView.scene().set_file(portrait_file)
+            portrait = os.path.join(str(self.imageFilePath.text()), novel_name+'.jpg')
+            if not os.path.exists(portrait):
+                portrait = os.path.join(str(self.imageFilePath.text()), novel_name+'.png')
+        self.portraitView.scene().set_file(portrait)
 
     @staticmethod
     def update_input_text(input_):
