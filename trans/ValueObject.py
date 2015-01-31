@@ -5,7 +5,6 @@ import os
 import re
 from codecs import open
 
-from util.Log import Log
 from db.SQLites import DB
 
 

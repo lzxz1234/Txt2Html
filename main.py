@@ -2,7 +2,6 @@
 
 import os
 import sys
-import shutil
 
 from PyQt4 import uic
 from PyQt4.Qt import SIGNAL
@@ -10,12 +9,13 @@ from PyQt4.QtGui import QApplication
 from PyQt4.QtGui import QMainWindow
 from PyQt4.QtGui import QFileDialog
 
-from util.File import scan, write
+from util.File import scan
 from ui.Model import ProcessModel
 from ui.PortraitDisplayScene import PortraitDisplayScene
 from db.SQLites import DB
 from util.Log import Log
 from trans import HtmlGenerator
+
 
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -42,6 +42,9 @@ class MainWindow(QMainWindow):
         self.novelFilePath.connect(self.novelFilePath,
                                    SIGNAL("textChanged(QString)"),
                                    self.refresh_file_list)
+        self.imageFilePath.connect(self.imageFilePath,
+                                   SIGNAL("textChanged(QString)"),
+                                   self.refresh_image_list)
         # 内容目录更改后保存到历史记录
         self.novelFilePath.connect(self.novelFilePath,
                                    SIGNAL("textChanged(QString)"),
@@ -73,14 +76,25 @@ class MainWindow(QMainWindow):
 
     def refresh_file_list(self, dir_path):
         novel_file_list = scan(unicode(dir_path))
-        Log.debug(u'加载[%s]目录共扫描到[%s]个文件'%(dir_path, len(novel_file_list)))
         self.treeView.setModel(ProcessModel(self.treeView, novel_file_list))
         self.treeView.connect(self.treeView.selectionModel(),
                               SIGNAL("currentRowChanged(QModelIndex, QModelIndex)"),
                               self.save_and_load_novel_info)
+        Log.info(u'加载小说目录[%s]完成'%dir_path)
+
+    def refresh_image_list(self, dir_path):
+        for novel in self.treeView.model().novels():
+            desc, portrait = DB.query_novel_info(novel.title)
+            if not os.path.exists(portrait):
+                portrait = os.path.join(str(self.imageFilePath.text()), novel.title+'.jpg')
+                if not os.path.exists(portrait):
+                    portrait = os.path.join(str(self.imageFilePath.text()), novel.title+'.png')
+                DB.save_novel_info(novel.title, desc, portrait)
+        Log.info(u'加载封面目录[%s]完成'%dir_path)
 
     def save_and_load_novel_info(self, current, previous):
         # save previous first
+        # 开局第一次切换时可能将正确封面的置空
         previous_novel = self.treeView.model().get_novel(previous)
         previous_file_desc = self.descBrowser.toPlainText()
         previous_file_icon = self.portraitView.scene().file_path
@@ -89,11 +103,6 @@ class MainWindow(QMainWindow):
         selected_novel = self.treeView.model().get_novel(current)
         desc, portrait = DB.query_novel_info(selected_novel.title)
         self.descBrowser.setPlainText(desc)
-        if not os.path.exists(portrait):
-            novel_name, novel_suffix = os.path.splitext(selected_novel.title)
-            portrait = os.path.join(str(self.imageFilePath.text()), novel_name+'.jpg')
-            if not os.path.exists(portrait):
-                portrait = os.path.join(str(self.imageFilePath.text()), novel_name+'.png')
         self.portraitView.scene().set_file(portrait)
 
     @staticmethod

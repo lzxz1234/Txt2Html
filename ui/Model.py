@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from PyQt4.QtCore import QAbstractTableModel
 from PyQt4.QtCore import QModelIndex, QVariant, Qt
 from PyQt4.QtCore import QString

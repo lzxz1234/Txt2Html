@@ -5,6 +5,7 @@ import os
 
 from util.Log import Log
 
+
 class DB(object):
 
     db_path = os.path.join(os.path.dirname(__file__), 'repository.sqlite')
