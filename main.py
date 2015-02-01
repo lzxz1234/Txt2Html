@@ -3,11 +3,13 @@
 import os
 import sys
 
-from PyQt4 import uic
+from PyQt4 import uic, QtCore
 from PyQt4.Qt import SIGNAL
+from PyQt4.QtCore import Qt, QCoreApplication
 from PyQt4.QtGui import QApplication
 from PyQt4.QtGui import QMainWindow
 from PyQt4.QtGui import QFileDialog
+from PyQt4.QtGui import QSplashScreen, QPixmap, QLabel
 
 from util.File import scan
 from ui.Model import ProcessModel
@@ -113,8 +115,21 @@ class MainWindow(QMainWindow):
             input_.setText(dir_path)
         dialog.destroy()
 
+    def getWidget(self, splash):
+        t = QtCore.QElapsedTimer()
+        t.start()
+        while (t.elapsed() < 5000):
+            str = QtCore.QString("times = ") + QtCore.QString.number(t.elapsed())
+            splash.showMessage(str)
+
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+
+    splash = QSplashScreen(QPixmap("ui/splash.jpg"))
+    splash.show()
+
     window = MainWindow()
+    splash.finish(window.getWidget(splash))
     window.show()
     sys.exit(app.exec_())
