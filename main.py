@@ -85,7 +85,7 @@ class MainWindow(QMainWindow):
     def refresh_image_list(self, dir_path):
         for novel in self.treeView.model().novels():
             desc, portrait = DB.query_novel_info(novel.title)
-            if not os.path.exists(portrait):
+            if portrait and not os.path.exists(portrait):
                 portrait = os.path.join(str(self.imageFilePath.text()), novel.title+'.jpg')
                 if not os.path.exists(portrait):
                     portrait = os.path.join(str(self.imageFilePath.text()), novel.title+'.png')
@@ -94,11 +94,11 @@ class MainWindow(QMainWindow):
 
     def save_and_load_novel_info(self, current, previous):
         # save previous first
-        # 开局第一次切换时可能将正确封面的置空
         previous_novel = self.treeView.model().get_novel(previous)
         previous_file_desc = self.descBrowser.toPlainText()
         previous_file_icon = self.portraitView.scene().file_path
-        DB.save_novel_info(previous_novel.title, str(previous_file_desc), previous_file_icon)
+        if previous_file_desc or previous_file_icon:
+            DB.save_novel_info(previous_novel.title, str(previous_file_desc), previous_file_icon)
         # load current
         selected_novel = self.treeView.model().get_novel(current)
         desc, portrait = DB.query_novel_info(selected_novel.title)
