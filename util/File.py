@@ -28,7 +28,7 @@ def write(dir, file_name, file_content):
     input.close()
 
 def cur_file_dir():
-    path = sys.path[0]
+    path = unicode(sys.path[0], 'gbk')
     if os.path.isdir(path):
         return path
     elif os.path.isfile(path):
