@@ -61,7 +61,8 @@ class NovelInfo(Seq):
 
     @property
     def desc(self):
-        return DB.query_novel_info(self.file_name)
+        desc, portrait = DB.query_novel_info(self.file_name)
+        return desc or ''
 
     def add_volume(self, volume):
         self._volumes.append(volume)

@@ -6,4 +6,4 @@
 
 /dist
 
-/repository.sqlite
+*.sqlite

@@ -34,7 +34,17 @@ class PortraitDisplayScene(QGraphicsScene):
                 jpg_data = read(file_path)
                 str_io = StringIO.StringIO(jpg_data)
                 img = Image.open(str_io)
+                img.thumbnail((300,300), Image.ANTIALIAS)
                 png_data = StringIO.StringIO()
+                mode = img.mode
+                if mode not in ('L', 'RGB'):
+                    if mode == 'RGBA':
+                        alpha = img.split()[3]
+                        bg_mask = alpha.point(lambda x: 255 - x)
+                        img = img.convert('RGB')
+                        img.paste((255, 255, 255), None, bg_mask)
+                    else:
+                        img = img.convert('RGB')
                 img.save(png_data, format='png')
                 pix_map.loadFromData(QtCore.QByteArray(png_data.getvalue()))
             else:
