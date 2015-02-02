@@ -11,8 +11,10 @@
     <p><img src="./post.jpg"></p>
     章节列表：
     {% for volume in novel.volumes %}
-        {% if volume.content != null %}
+        {% if volume.content != "" %}
         <h2><a href="./{{ volume.safe_name }}.html">{{ volume.name }}</a></h2>
+        {% else %}
+        <h2>{{ volume.name }}</h2>
         {% endif %}
         {% for chapter in volume.sub_chapters %}
             <h3><a href="./{{ volume.safe_name }}-{{ chapter.safe_name }}.html">{{ chapter.name }}</a></h3>

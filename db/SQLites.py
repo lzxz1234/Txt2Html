@@ -10,7 +10,7 @@ from util.File import cur_file_dir
 class DB(object):
 
     db_path = os.path.join(cur_file_dir(), 'repository.sqlite')
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_path, check_same_thread = False)
     conn.isolation_level = None
     conn.text_factory = lambda x: unicode(x, "utf-8", "ignore")
     conn.execute('CREATE TABLE IF NOT EXISTS NOVEL_INFO('

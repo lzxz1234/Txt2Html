@@ -2,6 +2,7 @@
 
 import os
 import sys
+import threading
 
 from PyQt4 import QtCore
 from PyQt4.Qt import SIGNAL
@@ -57,7 +58,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # 开始转换
         self.startConvert.connect(self.startConvert,
                                   SIGNAL("clicked()"),
-                                  self.start_convert)
+                                  lambda: threading.Thread(target=self.start_convert).start())
         # 日志定时刷新
         self.timer.connect(self.timer, SIGNAL("timeout()"), self.showLog)
 
