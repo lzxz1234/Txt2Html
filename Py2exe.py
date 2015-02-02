@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from distutils.core import setup
 import py2exe
+import glob
 import sys
 
 sys.argv.append('py2exe')  #允许程序通过双击的形式执行
 
 py2exe_options = {
-        "includes": ["sip", "resources"],
+        "includes": ["sip"],
         "dll_excludes": ["MSVCP90.dll",],
         "compressed": 1, #压缩文件
         "optimize": 2, #优化级别，默认为0
@@ -18,5 +19,6 @@ setup(
       version = '1.0',
       windows = ['main.py',],
       zipfile = None,
-      options = {'py2exe': py2exe_options}
+      options = {'py2exe': py2exe_options},
+      data_files=[("resources", glob.glob("resources\\*"))]
       )

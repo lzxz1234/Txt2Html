@@ -3,14 +3,14 @@
 import os
 import shutil
 
-from jinja2 import Environment, PackageLoader
+from jinja2 import Environment, FileSystemLoader
 
 from db.SQLites import DB
 from util.Log import Log
-from util.File import write
+from util.File import write, cur_file_dir
 
 
-env = Environment(loader=PackageLoader('resources'))
+env = Environment(loader=FileSystemLoader(os.path.join(cur_file_dir(), 'resources')))
 
 def genAll(novels, target_html_dir):
     for novel in novels:
