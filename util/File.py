@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 
 from codecs import open
 
@@ -18,6 +19,13 @@ def write(dir, file_name, file_content):
     input = open(os.path.join(dir, file_name), 'w', 'utf8')
     input.write(file_content)
     input.close()
+
+def cur_file_dir():
+    path = sys.path[0]
+    if os.path.isdir(path):
+        return path
+    elif os.path.isfile(path):
+        return os.path.dirname(path)
 
 if __name__ == '__main__':
     print(len(scan(u'G:\迅雷下载')))

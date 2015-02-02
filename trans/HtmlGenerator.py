@@ -3,14 +3,14 @@
 import os
 import shutil
 
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, PackageLoader
 
 from db.SQLites import DB
 from util.Log import Log
 from util.File import write
 
 
-env = Environment(loader=FileSystemLoader(os.path.dirname(__file__)))
+env = Environment(loader=PackageLoader('resources'))
 
 def genAll(novels, target_html_dir):
     for novel in novels:
@@ -18,7 +18,7 @@ def genAll(novels, target_html_dir):
         novel_cur_dir = os.path.join(target_html_dir, novel.safe_title)
         os.mkdir(novel_cur_dir)
         write(novel_cur_dir, 'index.html', genNovelIndex(novel))
-        portrait = DB.query_novel_portrait(novel.title)
+        desc, portrait = DB.query_novel_info(novel.title)
         if portrait:
             shutil.copy(portrait, os.path.join(novel_cur_dir, 'post.jpg'))
         else:

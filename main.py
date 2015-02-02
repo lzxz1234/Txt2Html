@@ -3,17 +3,17 @@
 import os
 import sys
 
-from PyQt4 import uic, QtCore
+from PyQt4 import QtCore
 from PyQt4.Qt import SIGNAL
-from PyQt4.QtCore import Qt, QCoreApplication
 from PyQt4.QtGui import QApplication
 from PyQt4.QtGui import QMainWindow
 from PyQt4.QtGui import QFileDialog
-from PyQt4.QtGui import QSplashScreen, QPixmap, QLabel
+from PyQt4.QtGui import QSplashScreen, QPixmap
 
 from util.File import scan
 from ui.Model import ProcessModel
 from ui.PortraitDisplayScene import PortraitDisplayScene
+from ui.MainWindow import Ui_MainWindow
 from db.SQLites import DB
 from util.Log import Log
 from trans import HtmlGenerator
@@ -23,11 +23,12 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 
-class MainWindow(QMainWindow):
+class MainWindow(QMainWindow, Ui_MainWindow):
 
     def __init__(self):
         super(MainWindow, self).__init__()
-        uic.loadUi('ui/MainWindow.ui', self)
+        # uic.loadUi('ui/MainWindow.ui', self)
+        self.setupUi(self)
 
         Log.console = self.logBrowser
         Log.status_bar = self.statusbar
@@ -126,7 +127,7 @@ class MainWindow(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    splash = QSplashScreen(QPixmap("ui/splash.jpg"))
+    splash = QSplashScreen(QPixmap("resources/splash.png"))
     splash.show()
 
     window = MainWindow()

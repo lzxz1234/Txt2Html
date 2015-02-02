@@ -4,11 +4,12 @@ import sqlite3
 import os
 
 from util.Log import Log
+from util.File import cur_file_dir
 
 
 class DB(object):
 
-    db_path = os.path.join(os.path.dirname(__file__), 'repository.sqlite')
+    db_path = os.path.join(cur_file_dir(), 'repository.sqlite')
     conn = sqlite3.connect(db_path)
     conn.isolation_level = None
     conn.text_factory = lambda x: unicode(x, "utf-8", "ignore")
