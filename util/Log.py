@@ -2,11 +2,11 @@
 
 import time
 
+from Queue import Queue
 
 class Log(object):
 
-    console = None
-    status_bar = None
+    messages = Queue(0)
 
     @staticmethod
     def debug(text):
@@ -26,11 +26,7 @@ class Log(object):
         format_text = '[<span style="color: blue;">%s</span>]' \
                       '[<span style="color: red;">%s</span>] - ' \
                       '<span style="color: green;">%s</span>' % (time_label, level, text)
-        Log.status_bar.showMessage(text)
-        if Log.console:
-            Log.console.append(format_text)
-        else:
-            print(format_text)
+        Log.messages.put(format_text)
 
 if __name__ == '__main__':
     Log.log('x', 'a')

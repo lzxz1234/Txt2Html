@@ -29,9 +29,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super(MainWindow, self).__init__()
         # uic.loadUi('ui/MainWindow.ui', self)
         self.setupUi(self)
-
-        Log.console = self.logBrowser
-        Log.status_bar = self.statusbar
+        self.timer = QtCore.QTimer()
         self.portraitView.setScene(PortraitDisplayScene())
         # 选择小说内容所在目录
         self.novelFileSelector.connect(self.novelFileSelector,
@@ -60,11 +58,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.startConvert.connect(self.startConvert,
                                   SIGNAL("clicked()"),
                                   self.start_convert)
+        # 日志定时刷新
+        self.timer.connect(self.timer, SIGNAL("timeout()"), self.showLog)
 
         self.novelFilePath.setText(DB.get_param('LAST_NOVEL_PATH'))
         self.imageFilePath.setText(DB.get_param('LAST_IMAGE_PATH'))
 
+        self.timer.start(100)
         Log.info(u'系统初始化完成...')
+
+    def showLog(self):
+        while True:
+            if Log.messages.empty():
+                break
+            self.logBrowser.append(Log.messages.get())
 
     def start_convert(self):
         Log.info(u'-------------------------开始生成 HTML-------------------------')
