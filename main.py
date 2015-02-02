@@ -88,7 +88,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def refresh_image_list(self, dir_path):
         for novel in self.treeView.model().novels():
             desc, portrait = DB.query_novel_info(novel.title)
-            if portrait and not os.path.exists(portrait):
+            if not os.path.exists(portrait):
                 portrait = os.path.join(str(self.imageFilePath.text()), novel.title+'.jpg')
                 if not os.path.exists(portrait):
                     portrait = os.path.join(str(self.imageFilePath.text()), novel.title+'.png')
