@@ -18,7 +18,7 @@ from ui.MainWindow import Ui_MainWindow
 from db.SQLites import DB
 from util.Log import Log
 from trans import HtmlGenerator
-
+from util.ThreadPool import ThreadPool
 
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -31,6 +31,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # uic.loadUi('ui/MainWindow.ui', self)
         self.setupUi(self)
         self.timer = QtCore.QTimer()
+        self.thread_pool = ThreadPool(1)
         self.portraitView.setScene(PortraitDisplayScene())
         # 选择小说内容所在目录
         self.novelFileSelector.connect(self.novelFileSelector,
@@ -58,7 +59,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # 开始转换
         self.startConvert.connect(self.startConvert,
                                   SIGNAL("clicked()"),
-                                  lambda: threading.Thread(target=self.start_convert).start())
+                                  lambda: self.thread_pool.add_task(self.start_convert))
         # 日志定时刷新
         self.timer.connect(self.timer, SIGNAL("timeout()"), self.showLog)
 
