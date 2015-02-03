@@ -15,8 +15,8 @@ from util.File import scan
 from ui.Model import ProcessModel
 from ui.PortraitDisplayScene import PortraitDisplayScene
 from ui.MainWindow import Ui_MainWindow
-from db.SQLites import DB
 from util.Log import Log
+from db.SQLites import DB
 from trans import HtmlGenerator
 from util.ThreadPool import ThreadPool
 
@@ -30,6 +30,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super(MainWindow, self).__init__()
         # uic.loadUi('ui/MainWindow.ui', self)
         self.setupUi(self)
+        self.db = DB()
         self.timer = QtCore.QTimer()
         self.thread_pool = ThreadPool(1)
         self.portraitView.setScene(PortraitDisplayScene())
@@ -51,11 +52,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # 内容目录更改后保存到历史记录
         self.novelFilePath.connect(self.novelFilePath,
                                    SIGNAL("textChanged(QString)"),
-                                   lambda x: DB.save_param('LAST_NOVEL_PATH', str(x)))
+                                   lambda x: self.db.save_param('LAST_NOVEL_PATH', str(x)))
         # 图片目录更改后保存到历史记录
         self.imageFilePath.connect(self.imageFilePath,
                                    SIGNAL("textChanged(QString)"),
-                                   lambda x: DB.save_param('LAST_IMAGE_PATH', str(x)))
+                                   lambda x: self.db.save_param('LAST_IMAGE_PATH', str(x)))
         # 开始转换
         self.startConvert.connect(self.startConvert,
                                   SIGNAL("clicked()"),
@@ -63,8 +64,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # 日志定时刷新
         self.timer.connect(self.timer, SIGNAL("timeout()"), self.showLog)
 
-        self.novelFilePath.setText(DB.get_param('LAST_NOVEL_PATH'))
-        self.imageFilePath.setText(DB.get_param('LAST_IMAGE_PATH'))
+        self.novelFilePath.setText(self.db.get_param('LAST_NOVEL_PATH'))
+        self.imageFilePath.setText(self.db.get_param('LAST_IMAGE_PATH'))
 
         self.timer.start(100)
         Log.info(u'系统初始化完成...')
@@ -96,12 +97,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def refresh_image_list(self, dir_path):
         for novel in self.treeView.model().novels():
-            desc, portrait = DB.query_novel_info(novel.title)
+            desc, portrait = self.db.query_novel_info(novel.title)
             if not os.path.exists(portrait):
                 portrait = os.path.join(str(self.imageFilePath.text()), novel.title+'.jpg')
                 if not os.path.exists(portrait):
                     portrait = os.path.join(str(self.imageFilePath.text()), novel.title+'.png')
-                DB.save_novel_info(novel.title, desc, portrait)
+                self.db.save_novel_info(novel.title, desc, portrait)
         Log.info(u'加载封面目录[%s]完成'%dir_path)
 
     def save_and_load_novel_info(self, current, previous):
@@ -110,10 +111,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         previous_file_desc = self.descBrowser.toPlainText()
         previous_file_icon = self.portraitView.scene().file_path
         if previous_file_desc or previous_file_icon:
-            DB.save_novel_info(previous_novel.title, str(previous_file_desc), previous_file_icon)
+            self.db.save_novel_info(previous_novel.title, str(previous_file_desc), previous_file_icon)
         # load current
         selected_novel = self.treeView.model().get_novel(current)
-        desc, portrait = DB.query_novel_info(selected_novel.title)
+        desc, portrait = self.db.query_novel_info(selected_novel.title)
         self.descBrowser.setPlainText(desc)
         self.portraitView.scene().set_file(portrait)
 
