@@ -135,7 +135,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    splash = QSplashScreen(QPixmap("resources/splash.png"))
+    splash_pix = QPixmap("resources/splash.png")
+    splash = QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
+    splash.setMask(splash_pix.mask())
     splash.show()
 
     window = MainWindow()
