@@ -10,8 +10,7 @@ from util.Singleton import Singleton
 
 class DB(Singleton):
 
-    @classmethod
-    def configure(self):
+    def post_construct(self):
         db_path = os.path.join(cur_file_dir(), 'repository.sqlite')
         self.conn = sqlite3.connect(db_path, check_same_thread = False)
         self.conn.isolation_level = None
@@ -23,7 +22,6 @@ class DB(Singleton):
                      'DESCRIPTION VARCHAR(2000) )')
         self.conn.execute('CREATE TABLE IF NOT EXISTS PARAMETER(ID INTEGER PRIMARY KEY '
                      'AUTOINCREMENT, NAME VARCHAR(20), VALUE VARCHAR(100))')
-        return DB
 
     def get_param(self, name):
         cur = self.conn.cursor()

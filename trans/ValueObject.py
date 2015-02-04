@@ -23,6 +23,7 @@ class NovelInfo(Seq):
         self._volumes = []
         self._title = None
         self._file = None
+        self.db = DB()
 
     @staticmethod
     def fromFile(novel_path):
@@ -61,7 +62,7 @@ class NovelInfo(Seq):
 
     @property
     def desc(self):
-        desc, portrait = DB.query_novel_info(self.file_name)
+        desc, portrait = self.db.query_novel_info(self.file_name)
         return desc or ''
 
     def add_volume(self, volume):

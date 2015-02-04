@@ -15,16 +15,6 @@ class Singleton(object):
                     instance = super(Singleton, cls).__new__(impl, *args, **kwargs)
                     if not isinstance(instance, cls):
                         instance.__init__(*args, **kwargs)
+                    instance.post_construct() if hasattr(cls, "post_construct") else None
                     cls._instance = instance
         return cls._instance
-
-class DB(Singleton):
-
-    @classmethod
-    def configure(self):
-        print(self)
-        return DB
-
-if __name__ == '__main__':
-    print(DB())
-    print(DB())

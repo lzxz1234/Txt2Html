@@ -17,7 +17,8 @@ def genAll(novels, target_html_dir):
     for novel in novels:
         Log.info(u'处理文件[%s]'%novel.file)
         novel_cur_dir = os.path.join(target_html_dir, novel.safe_title)
-        os.mkdir(novel_cur_dir)
+        if not os.path.exists(novel_cur_dir):
+            os.mkdir(novel_cur_dir)
         write(novel_cur_dir, 'index.html', genNovelIndex(novel))
         desc, portrait = db.query_novel_info(novel.title)
         if portrait:
