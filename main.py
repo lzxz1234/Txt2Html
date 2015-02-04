@@ -2,7 +2,6 @@
 
 import os
 import sys
-import threading
 
 from PyQt4 import QtCore
 from PyQt4.Qt import SIGNAL
@@ -10,6 +9,8 @@ from PyQt4.QtGui import QApplication
 from PyQt4.QtGui import QMainWindow
 from PyQt4.QtGui import QFileDialog
 from PyQt4.QtGui import QSplashScreen, QPixmap
+
+from progressbar import ProgressBar
 
 from util.File import scan
 from ui.Model import ProcessModel
@@ -129,10 +130,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def getWidget(self, splash):
         t = QtCore.QElapsedTimer()
         t.start()
+        progress_bar = ProgressBar(maxval=5000, term_width=65)
         while (t.elapsed() < 5000):
-            str = QtCore.QString("times = ") + QtCore.QString.number(t.elapsed())
-            splash.showMessage(str)
-
+            progress_bar.update(t.elapsed())
+            splash.showMessage(progress_bar._format_line(), QtCore.Qt.AlignTop)
+        progress_bar.finish()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
