@@ -8,73 +8,66 @@ from codecs import open
 from db.SQLites import DB
 
 
-class Seq():
+class NovelInfo():
 
     seq = 1
 
     def __init__(self):
-        self.seq = str(Seq.seq)
-        Seq.seq += 1
-
-class NovelInfo(Seq):
-
-    def __init__(self):
-        Seq.__init__(self)
-        self._volumes = []
+        self._seq = str(NovelInfo.seq)
+        NovelInfo.seq += 1
         self._title = None
-        self._file = None
+        self._file_path = None
+        self._file_name = None
         self.db = DB()
 
     @staticmethod
     def fromFile(novel_path):
-        p = re.compile(u'(§+)\s*([^\r\n]+)([^§]+)')
         result = NovelInfo()
-        for encode in ['utf8', 'gb2312', 'gb18030']:
-            fileInput = open(novel_path, encoding=encode)
-            try :
-                allText = fileInput.read()
-                result._file = os.path.split(novel_path)[1]
-                result._title = os.path.basename(novel_path).split('.')[0]
-                last_volume = None
-                for flag, name, content in p.findall(allText):
-                    chapter = Chapter()
-                    chapter.name = name
-                    chapter.content = content
-                    if flag == u"§§":
-                        last_volume = chapter
-                        result.add_volume(chapter)
-                    else:
-                        if not last_volume:
-                            last_volume = Chapter()
-                            chapter.name = result.title
-                            result.add_volume(last_volume)
-                        last_volume.addChapter(chapter)
-                break
-            except UnicodeDecodeError as e:
-                continue
-            finally :
-                fileInput.close()
+        result._file_path = novel_path
+        result._file_name = os.path.split(novel_path)[1]
+        result._title = os.path.basename(novel_path).split('.')[0]
         return result
 
     @property
     def volumes(self):
-        return self._volumes
+        volumes = []
+        seq = 1
+        p = re.compile(u'(§+)\s*([^\r\n]+)([^§]+)')
+        for encode in ['utf8', 'gb2312', 'gb18030']:
+            fileInput = open(self._file_path, encoding=encode)
+            try :
+                allText = fileInput.read()
+                last_volume = None
+                for flag, name, content in p.findall(allText):
+                    chapter = Chapter()
+                    chapter._name = name
+                    chapter._safe_name = str(seq)
+                    seq += 1
+                    chapter._content = content
+                    if flag == u"§§":
+                        last_volume = chapter
+                        volumes.append(chapter)
+                    else:
+                        if not last_volume:
+                            last_volume = Chapter()
+                            chapter._name = self.title
+                            volumes.append(last_volume)
+                        last_volume.addChapter(chapter)
+                break
+            except UnicodeDecodeError:
+                continue
+            finally :
+                fileInput.close()
+        return volumes
 
     @property
     def desc(self):
-        desc, portrait = self.db.query_novel_info(self.file_name)
+        desc, portrait = self.db.query_novel_info(os.path.split(self._file_name)[1])
         return desc or ''
-
-    def add_volume(self, volume):
-        self._volumes.append(volume)
-
-    @property
-    def file(self):
-        return self._file
 
     @property
     def file_name(self):
-        return os.path.split(self._file)[1]
+        return self._file_name
 
     @property
     def title(self):
@@ -82,15 +75,15 @@ class NovelInfo(Seq):
 
     @property
     def safe_title(self):
-        return self.seq
+        return self._seq
 
-class Chapter(Seq):
+class Chapter():
 
     def __init__(self):
-        Seq.__init__(self)
         self._name = None
         self._content = None
         self._sub_chapters = []
+        self._safe_name = None
 
     def addChapter(self, chapter):
         self._sub_chapters.append(chapter)
@@ -105,16 +98,8 @@ class Chapter(Seq):
 
     @property
     def safe_name(self):
-        return self.seq
-
-    @name.setter
-    def name(self, name):
-        self._name = name
+        return self._safe_name
 
     @property
     def content(self):
         return self._content
-
-    @content.setter
-    def content(self, content):
-        self._content = content

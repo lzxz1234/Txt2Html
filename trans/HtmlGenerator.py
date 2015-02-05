@@ -15,7 +15,7 @@ env = Environment(loader=FileSystemLoader(os.path.join(cur_file_dir(), 'resource
 def genAll(novels, target_html_dir):
     db = DB()
     for novel in novels:
-        Log.info(u'处理文件[%s]'%novel.file)
+        Log.info(u'处理文件[%s]'%novel.file_name)
         novel_cur_dir = os.path.join(target_html_dir, novel.safe_title)
         if not os.path.exists(novel_cur_dir):
             os.mkdir(novel_cur_dir)

@@ -138,8 +138,8 @@ if __name__ == '__main__':
 
     t = QtCore.QElapsedTimer()
     t.start()
-    progressBar.setMaximum(5000)
-    while (t.elapsed() < 5000):
+    progressBar.setMaximum(1000)
+    while (t.elapsed() < 1000):
         progressBar.setValue(t.elapsed())
 
     window = MainWindow()
