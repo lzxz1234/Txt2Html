@@ -43,7 +43,7 @@ class NovelInfo():
                     chapter._name = name
                     chapter._safe_name = str(seq)
                     seq += 1
-                    chapter._content = content
+                    chapter._content = content.strip()
                     if flag == u"§§":
                         last_volume = chapter
                         volumes.append(chapter)
